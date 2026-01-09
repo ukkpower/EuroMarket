@@ -36,13 +36,13 @@ export function MarketGrid() {
     <motion.div
       layout
       className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+      transition={{ layout: { duration: 0.2 } }}
     >
       <AnimatePresence mode="popLayout">
-        {filteredMarkets.map((market, index) => (
+        {filteredMarkets.map((market) => (
           <MarketCard 
             key={market.id} 
-            market={market} 
-            index={index}
+            market={market}
           />
         ))}
       </AnimatePresence>

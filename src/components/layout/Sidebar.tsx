@@ -7,10 +7,13 @@ import {
   Trophy, 
   Music, 
   TrendingUp, 
-  Leaf, 
   Cpu,
   Activity,
   HelpCircle,
+  Globe,
+  Coins,
+  Map,
+  Flag,
   type LucideIcon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -30,12 +33,15 @@ const categories: CategoryItem[] = [
   { id: 'trending', label: 'Trending', icon: Flame, section: 'global' },
   { id: 'new', label: 'New', icon: Clock, section: 'global' },
   // Euro-Centric Categories
+  { id: 'ireland', label: 'Ireland', icon: Flag, section: 'euro' },
+  { id: 'europe', label: 'Europe', icon: Globe, section: 'euro' },
+  { id: 'sports', label: 'Sports', icon: Trophy, section: 'euro' },
   { id: 'politics', label: 'Politics', icon: Landmark, section: 'euro' },
-  { id: 'football', label: 'Football', icon: Trophy, section: 'euro' },
-  { id: 'culture', label: 'Culture', icon: Music, section: 'euro' },
+  { id: 'crypto', label: 'Crypto', icon: Coins, section: 'euro' },
   { id: 'finance', label: 'Finance', icon: TrendingUp, section: 'euro' },
-  { id: 'climate', label: 'Climate', icon: Leaf, section: 'euro' },
+  { id: 'geopolitics', label: 'Geopolitics', icon: Map, section: 'euro' },
   { id: 'tech', label: 'Tech', icon: Cpu, section: 'euro' },
+  { id: 'culture', label: 'Culture', icon: Music, section: 'euro' },
 ];
 
 type SidebarProps = {

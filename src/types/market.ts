@@ -1,12 +1,15 @@
 export type Category = 
   | 'trending'
   | 'new'
+  | 'ireland'
+  | 'europe'
+  | 'sports'
   | 'politics'
-  | 'football'
-  | 'culture'
+  | 'crypto'
   | 'finance'
-  | 'climate'
-  | 'tech';
+  | 'geopolitics'
+  | 'tech'
+  | 'culture';
 
 export type SubFilter = {
   id: string;

@@ -12,12 +12,14 @@ import { cn } from '@/lib/utils';
 const categoryLabels: Record<string, string> = {
   trending: 'Trending Markets',
   new: 'New Markets',
+  europe: 'Europe',
+  sports: 'Sports',
   politics: 'Politics',
-  football: 'Football',
-  culture: 'Culture',
+  crypto: 'Crypto',
   finance: 'Finance',
-  climate: 'Climate',
+  geopolitics: 'Geopolitics',
   tech: 'Tech',
+  culture: 'Culture',
 };
 
 export function SubFilterBar() {

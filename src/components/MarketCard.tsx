@@ -10,10 +10,9 @@ import { cn } from '@/lib/utils';
 
 type MarketCardProps = {
   market: Market;
-  index?: number;
 };
 
-export function MarketCard({ market, index = 0 }: MarketCardProps) {
+export function MarketCard({ market }: MarketCardProps) {
   const daysUntilEnd = Math.ceil(
     (new Date(market.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   );
@@ -26,14 +25,19 @@ export function MarketCard({ market, index = 0 }: MarketCardProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ 
-        duration: 0.3, 
-        delay: index * 0.05,
-        layout: { type: 'spring', stiffness: 300, damping: 30 }
+        duration: 0.2, 
+        layout: { 
+          type: 'spring', 
+          stiffness: 500, 
+          damping: 35,
+          mass: 0.5
+        }
       }}
       whileHover={{ 
         y: -4,
         boxShadow: '0 20px 40px -12px rgba(0, 87, 255, 0.15)',
       }}
+      style={{ willChange: 'transform' }}
       className="group relative bg-card rounded-2xl border border-border/50 p-5 cursor-pointer transition-colors hover:border-primary/30"
     >
       {/* Hot/New Badge */}
