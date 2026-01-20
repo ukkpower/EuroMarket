@@ -6,21 +6,8 @@ import { SlidersHorizontal, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMarketStore } from '@/store/marketStore';
-import { subFilters as subFilterData } from '@/data/markets';
+import { subFilters as subFilterData, categoryLabels } from '@/data/categories';
 import { cn } from '@/lib/utils';
-
-const categoryLabels: Record<string, string> = {
-  trending: 'Trending Markets',
-  new: 'New Markets',
-  europe: 'Europe',
-  sports: 'Sports',
-  politics: 'Politics',
-  crypto: 'Crypto',
-  finance: 'Finance',
-  geopolitics: 'Geopolitics',
-  tech: 'Tech',
-  culture: 'Culture',
-};
 
 export function SubFilterBar() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -147,7 +134,7 @@ export function SubFilterBar() {
                 className="cursor-pointer"
                 onClick={() => setAdvancedFilter('minLiquidity', !advancedFilters.minLiquidity)}
               >
-                Min Liquidity €100K
+                Min Liquidity $100K
                 {advancedFilters.minLiquidity && <X className="h-3 w-3 ml-1" />}
               </Badge>
               <Badge
@@ -199,4 +186,3 @@ export function SubFilterBar() {
     </div>
   );
 }
-

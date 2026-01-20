@@ -10,8 +10,8 @@ const initialAdvancedFilters: AdvancedFilters = {
 export const useMarketStore = create<MarketStore>((set) => ({
   activeCategory: 'trending',
   subFilters: [],
-  advancedFilters: initialAdvancedFilters,
   searchQuery: '',
+  advancedFilters: initialAdvancedFilters,
   
   setActiveCategory: (category: Category) => 
     set({ activeCategory: category, subFilters: [] }),
@@ -23,18 +23,18 @@ export const useMarketStore = create<MarketStore>((set) => ({
         : [...state.subFilters, filterId],
     })),
   
+  setSearchQuery: (query: string) => set({ searchQuery: query }),
+  
   setAdvancedFilter: (key: keyof AdvancedFilters, value: boolean) =>
     set((state) => ({
       advancedFilters: { ...state.advancedFilters, [key]: value },
     })),
   
-  setSearchQuery: (query: string) => set({ searchQuery: query }),
-  
   resetFilters: () =>
     set({
+      activeCategory: 'trending',
       subFilters: [],
       advancedFilters: initialAdvancedFilters,
       searchQuery: '',
     }),
 }));
-

@@ -8,15 +8,16 @@ import {
   Music, 
   TrendingUp, 
   Cpu,
-  Activity,
   HelpCircle,
   Globe,
   Coins,
   Map,
   Flag,
+  FlaskConical,
   type LucideIcon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useRouter, usePathname } from 'next/navigation';
 import { useMarketStore } from '@/store/marketStore';
 import type { Category } from '@/types/market';
 import { cn } from '@/lib/utils';
@@ -25,7 +26,7 @@ type CategoryItem = {
   id: Category;
   label: string;
   icon: LucideIcon;
-  section: 'global' | 'euro' | 'secondary';
+  section: 'global' | 'euro';
 };
 
 const categories: CategoryItem[] = [
@@ -42,6 +43,7 @@ const categories: CategoryItem[] = [
   { id: 'geopolitics', label: 'Geopolitics', icon: Map, section: 'euro' },
   { id: 'tech', label: 'Tech', icon: Cpu, section: 'euro' },
   { id: 'culture', label: 'Culture', icon: Music, section: 'euro' },
+  { id: 'science', label: 'Science', icon: FlaskConical, section: 'euro' },
 ];
 
 type SidebarProps = {
@@ -50,6 +52,8 @@ type SidebarProps = {
 
 export function Sidebar({ isMobile = false }: SidebarProps) {
   const { activeCategory, setActiveCategory } = useMarketStore();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const globalCategories = categories.filter((c) => c.section === 'global');
   const euroCategories = categories.filter((c) => c.section === 'euro');
@@ -58,11 +62,19 @@ export function Sidebar({ isMobile = false }: SidebarProps) {
     const isActive = activeCategory === item.id;
     const Icon = item.icon;
 
+    const handleCategoryClick = () => {
+      setActiveCategory(item.id);
+      // Navigate to markets page if we're on an event page
+      if (pathname?.startsWith('/event/')) {
+        router.push('/markets');
+      }
+    };
+
     return (
       <motion.button
         whileHover={{ x: 4 }}
         whileTap={{ scale: 0.98 }}
-        onClick={() => setActiveCategory(item.id)}
+        onClick={handleCategoryClick}
         className={cn(
           'relative w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
           isActive
@@ -139,14 +151,6 @@ export function Sidebar({ isMobile = false }: SidebarProps) {
           whileHover={{ x: 4 }}
           className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
         >
-          <Activity className="h-5 w-5" />
-          <span>Activity Feed</span>
-          <span className="ml-auto flex h-2 w-2 rounded-full bg-success animate-pulse" />
-        </motion.button>
-        <motion.button
-          whileHover={{ x: 4 }}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-        >
           <HelpCircle className="h-5 w-5" />
           <span>Help & Support</span>
         </motion.button>
@@ -154,4 +158,3 @@ export function Sidebar({ isMobile = false }: SidebarProps) {
     </aside>
   );
 }
-
