@@ -2,17 +2,29 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, ChevronDown } from 'lucide-react';
+import { Wallet, ChevronDown, LogIn, Loader2 } from 'lucide-react';
 import { OutcomeSelector } from './OutcomeSelector';
 import { AmountInput } from './AmountInput';
 import { OrderSummary } from './OrderSummary';
 import { useEventStore, calculateTradeEstimate } from '@/store/eventStore';
 import { useOrderBook } from '@/hooks/useOrderBook';
+import { useWallet } from '@/providers/WalletContext';
+import { useTrading } from '@/providers/TradingProvider';
+import useClobOrder from '@/hooks/useClobOrder';
 import type { ParsedMarket, TradeSide, OrderType } from '@/types/market';
 import { cn } from '@/lib/utils';
 
 type TradeSidebarProps = {
   market: ParsedMarket;
+};
+
+const STEP_LABELS: Record<string, string> = {
+  idle: '',
+  checking: 'Checking setup...',
+  deploying: 'Deploying Safe wallet...',
+  credentials: 'Getting API credentials...',
+  approvals: 'Setting token approvals...',
+  complete: 'Ready to trade!',
 };
 
 export function TradeSidebar({ market }: TradeSidebarProps) {
@@ -33,6 +45,21 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { data: orderBook } = useOrderBook(market);
 
+  const { isConnected, connect } = useWallet();
+  const {
+    isTradingSessionComplete,
+    initializeTradingSession,
+    currentStep,
+    sessionError,
+    clobClient,
+    safeAddress,
+  } = useTrading();
+
+  const { submitOrder, isSubmitting, error: orderError } = useClobOrder(
+    clobClient,
+    safeAddress
+  );
+
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,19 +72,14 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
   }, []);
 
   // Get current price based on selected outcome and trade side
-  // Buy = use ask prices (what sellers want) 
-  // Sell = use bid prices (what buyers will pay)
   const getTradePrice = () => {
     if (!orderBook) {
-      // Fallback to market prices if order book not available
       return selectedOutcome === 'yes' ? market.yesPrice : market.noPrice;
     }
 
     if (tradeSide === 'buy') {
-      // When buying, you pay the ask price (what sellers want)
       return selectedOutcome === 'yes' ? orderBook.yes.bestAsk : orderBook.no.bestAsk;
     } else {
-      // When selling, you receive the bid price (what buyers will pay)
       return selectedOutcome === 'yes' ? orderBook.yes.bestBid : orderBook.no.bestBid;
     }
   };
@@ -69,10 +91,30 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
   const estimate = calculateTradeEstimate(amount, effectivePrice, selectedOutcome);
 
   const isValidTrade = estimate.shares > 0 && estimate.cost > 0;
+  const isSessionInitializing = currentStep !== 'idle' && currentStep !== 'complete';
 
   const handleOrderTypeChange = (type: OrderType) => {
     setOrderType(type);
     setIsDropdownOpen(false);
+  };
+
+  const handleSubmitOrder = async () => {
+    if (!isTradingSessionComplete || !isValidTrade) return;
+
+    try {
+      // We need the token ID for the market
+      // The market.id from Polymarket is the condition ID
+      // For CLOB orders we need the token ID which maps to the outcome
+      await submitOrder({
+        tokenId: market.id,
+        size: estimate.shares,
+        price: effectivePrice,
+        side: tradeSide === 'buy' ? 'BUY' : 'SELL',
+        isMarketOrder: orderType === 'market',
+      });
+    } catch (err) {
+      console.error('Order submission failed:', err);
+    }
   };
 
   return (
@@ -203,34 +245,102 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
             />
           )}
 
-          {/* Submit Button */}
-          <motion.button
-            whileHover={{ scale: isValidTrade ? 1.02 : 1 }}
-            whileTap={{ scale: isValidTrade ? 0.98 : 1 }}
-            disabled={!isValidTrade}
-            className={cn(
-              'w-full py-4 rounded-xl font-semibold text-lg transition-all',
-              'flex items-center justify-center gap-2',
-              isValidTrade
-                ? selectedOutcome === 'yes'
-                  ? 'bg-success hover:bg-success/90 text-success-foreground'
-                  : 'bg-danger hover:bg-danger/90 text-danger-foreground'
-                : 'bg-secondary text-muted-foreground cursor-not-allowed'
-            )}
-          >
-            <Wallet className="h-5 w-5" />
-            <span>
-              {isValidTrade 
-                ? `${tradeSide === 'buy' ? 'Buy' : 'Sell'} ${selectedOutcome === 'yes' ? 'Yes' : 'No'}`
-                : 'Enter Amount'
-              }
-            </span>
-          </motion.button>
+          {/* Submit / Auth Section */}
+          {!isConnected ? (
+            // Not logged in - show login button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={connect}
+              className="w-full py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <LogIn className="h-5 w-5" />
+              <span>Log in to trade</span>
+            </motion.button>
+          ) : !isTradingSessionComplete ? (
+            // Logged in but session not initialized
+            <div className="space-y-3">
+              <motion.button
+                whileHover={{ scale: isSessionInitializing ? 1 : 1.02 }}
+                whileTap={{ scale: isSessionInitializing ? 1 : 0.98 }}
+                onClick={initializeTradingSession}
+                disabled={isSessionInitializing}
+                className={cn(
+                  'w-full py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2',
+                  isSessionInitializing
+                    ? 'bg-secondary text-muted-foreground cursor-wait'
+                    : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                )}
+              >
+                {isSessionInitializing ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>{STEP_LABELS[currentStep]}</span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="h-5 w-5" />
+                    <span>Initialize Trading</span>
+                  </>
+                )}
+              </motion.button>
+              {sessionError && (
+                <p className="text-center text-xs text-danger">
+                  {sessionError.message}
+                </p>
+              )}
+            </div>
+          ) : (
+            // Trading session complete - show trade button
+            <div className="space-y-3">
+              <motion.button
+                whileHover={{ scale: isValidTrade && !isSubmitting ? 1.02 : 1 }}
+                whileTap={{ scale: isValidTrade && !isSubmitting ? 0.98 : 1 }}
+                disabled={!isValidTrade || isSubmitting}
+                onClick={handleSubmitOrder}
+                className={cn(
+                  'w-full py-4 rounded-xl font-semibold text-lg transition-all',
+                  'flex items-center justify-center gap-2',
+                  isSubmitting
+                    ? 'bg-secondary text-muted-foreground cursor-wait'
+                    : isValidTrade
+                      ? selectedOutcome === 'yes'
+                        ? 'bg-success hover:bg-success/90 text-success-foreground'
+                        : 'bg-danger hover:bg-danger/90 text-danger-foreground'
+                      : 'bg-secondary text-muted-foreground cursor-not-allowed'
+                )}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="h-5 w-5" />
+                    <span>
+                      {isValidTrade 
+                        ? `${tradeSide === 'buy' ? 'Buy' : 'Sell'} ${selectedOutcome === 'yes' ? 'Yes' : 'No'}`
+                        : 'Enter Amount'
+                      }
+                    </span>
+                  </>
+                )}
+              </motion.button>
+              {orderError && (
+                <p className="text-center text-xs text-danger">
+                  {orderError.message}
+                </p>
+              )}
+            </div>
+          )}
 
-          {/* Connect Wallet Notice */}
-          <p className="text-center text-xs text-muted-foreground">
-            Connect wallet to trade
-          </p>
+          {/* Wallet Address Notice */}
+          {isConnected && safeAddress && (
+            <p className="text-center text-xs text-muted-foreground font-mono">
+              Safe: {safeAddress.slice(0, 6)}...{safeAddress.slice(-4)}
+            </p>
+          )}
         </motion.div>
       </div>
     </div>
