@@ -25,6 +25,7 @@ export default function useUsdcBalance() {
   const {
     data: balance,
     isLoading,
+    isFetching,
     error,
     refetch,
   } = useQuery({
@@ -47,13 +48,16 @@ export default function useUsdcBalance() {
       };
     },
     enabled: !!publicClient && !!safeAddress,
-    refetchInterval: 30_000,
-    staleTime: 15_000,
+    refetchInterval: 15_000,
+    staleTime: 5_000,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 10_000),
   });
 
   return {
     balance: balance ?? { raw: "0", formatted: "0.00", value: 0 },
     isLoading,
+    isFetching,
     error,
     refetch,
   };

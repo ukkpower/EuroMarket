@@ -5,6 +5,7 @@ import {
   createPublicClient,
   createWalletClient,
   custom,
+  fallback,
   http,
   WalletClient,
 } from "viem";
@@ -14,9 +15,20 @@ import { polygon } from "viem/chains";
 import { WalletContext, WalletContextType } from "./WalletContext";
 import { POLYGON_RPC_URL } from "@/constants/api";
 
+// Use multiple public RPC endpoints with automatic fallback so a single
+// provider outage or rate-limit doesn't silently break balance fetching.
+const FALLBACK_RPC_URLS = [
+  POLYGON_RPC_URL,
+  "https://polygon-bor-rpc.publicnode.com",
+  "https://rpc-mainnet.matic.quiknode.pro",
+  "https://polygon.meowrpc.com",
+];
+
 const publicClient = createPublicClient({
   chain: polygon,
-  transport: http(POLYGON_RPC_URL),
+  transport: fallback(
+    FALLBACK_RPC_URLS.map((url) => http(url, { timeout: 8_000 }))
+  ),
 });
 
 export function WalletProvider({ children }: { children: ReactNode }) {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Check, ArrowDownToLine, AlertTriangle } from 'lucide-react';
+import { Copy, Check, ArrowDownToLine, AlertTriangle, RefreshCw, WifiOff } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -21,14 +21,21 @@ interface DepositDialogProps {
 
 export default function DepositDialog({ open, onOpenChange }: DepositDialogProps) {
   const { safeAddress } = useTrading();
-  const { balance } = useUsdcBalance();
+  const { balance, isLoading, isFetching, error, refetch } = useUsdcBalance();
   const [copied, setCopied] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleCopy = async () => {
     if (!safeAddress) return;
     await navigator.clipboard.writeText(safeAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
   };
 
   return (
@@ -101,17 +108,43 @@ export default function DepositDialog({ open, onOpenChange }: DepositDialogProps
             </p>
           </div>
 
+          {/* RPC error banner */}
+          {error && (
+            <div className="flex gap-2 bg-destructive/10 border border-destructive/20 rounded-xl p-3">
+              <WifiOff className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-xs text-destructive">
+                Could not fetch balance from the network. Your deposit may still have arrived — tap <strong>Refresh</strong> to try again.
+              </p>
+            </div>
+          )}
+
           {/* Current Balance */}
           <div className="flex items-center justify-between text-sm pt-2 border-t border-border/30">
             <span className="text-muted-foreground">Current Balance</span>
-            <span className="font-medium">${balance.formatted} USDC</span>
+            <div className="flex items-center gap-2">
+              {(isLoading || isFetching || isRefreshing) ? (
+                <RefreshCw className="h-3.5 w-3.5 text-muted-foreground animate-spin" />
+              ) : null}
+              <span className={`font-medium ${error ? 'text-muted-foreground' : ''}`}>
+                {error ? '—' : `$${balance.formatted} USDC`}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-2">
+        <div className="mt-2 flex gap-2">
           <Button
             variant="outline"
-            className="w-full"
+            className="flex-1"
+            onClick={handleRefresh}
+            disabled={isRefreshing || isFetching}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing || isFetching ? 'animate-spin' : ''}`} />
+            Refresh Balance
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
             onClick={() => onOpenChange(false)}
           >
             Done
