@@ -123,21 +123,21 @@ export function Header() {
             <span className="sr-only">Toggle theme</span>
           </Button>
 
-          {/* Auth Section */}
+          {/* Auth Section - always visible on all screen sizes */}
           {isConnected && eoaAddress ? (
-            <div className="relative" ref={menuRef}>
+            <div className="relative shrink-0" ref={menuRef}>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors shrink-0"
               >
-                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
                   <span className="text-primary-foreground text-xs font-bold">
                     {email ? email[0].toUpperCase() : eoaAddress.slice(2, 4).toUpperCase()}
                   </span>
                 </div>
-                <span className="hidden sm:inline text-sm font-medium">
+                <span className="hidden sm:inline text-sm font-medium truncate max-w-[100px] sm:max-w-none">
                   {truncateAddress(safeAddress || eoaAddress)}
                 </span>
               </motion.button>
@@ -197,9 +197,9 @@ export function Header() {
               </AnimatePresence>
             </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-2">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button size="sm" className="gap-1 bg-primary hover:bg-primary/90" onClick={connect}>
+            <div className="flex items-center gap-2 shrink-0">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="shrink-0">
+                <Button size="sm" className="gap-1 bg-primary hover:bg-primary/90 shrink-0" onClick={connect}>
                   <LogIn className="h-4 w-4" />
                   <span className="hidden md:inline">Log in</span>
                 </Button>
