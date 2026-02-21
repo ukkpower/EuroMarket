@@ -94,7 +94,9 @@ export default function useClobOrder(
         if (response.orderID) {
           setOrderId(response.orderID);
           queryClient.invalidateQueries({ queryKey: ["active-orders"] });
-          queryClient.invalidateQueries({ queryKey: ["polymarket-positions"] });
+          queryClient.invalidateQueries({ queryKey: ["open-orders"] });
+          queryClient.invalidateQueries({ queryKey: ["trade-history"] });
+          queryClient.invalidateQueries({ queryKey: ["portfolio-value"] });
           return { success: true, orderId: response.orderID };
         } else {
           throw new Error("Order submission failed");
@@ -123,6 +125,7 @@ export default function useClobOrder(
       try {
         await clobClient.cancelOrder({ orderID: orderIdToCancel });
         queryClient.invalidateQueries({ queryKey: ["active-orders"] });
+        queryClient.invalidateQueries({ queryKey: ["open-orders"] });
         return { success: true };
       } catch (err: unknown) {
         const error =
@@ -136,9 +139,64 @@ export default function useClobOrder(
     [clobClient, queryClient]
   );
 
+  const cancelMultipleOrders = useCallback(
+    async (orderIds: string[]) => {
+      if (!clobClient) {
+        throw new Error("CLOB client not initialized");
+      }
+
+      setIsSubmitting(true);
+      setError(null);
+
+      try {
+        await clobClient.cancelOrders(orderIds);
+        queryClient.invalidateQueries({ queryKey: ["active-orders"] });
+        queryClient.invalidateQueries({ queryKey: ["open-orders"] });
+        return { success: true };
+      } catch (err: unknown) {
+        const error =
+          err instanceof Error
+            ? err
+            : new Error("Failed to cancel orders");
+        setError(error);
+        throw error;
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [clobClient, queryClient]
+  );
+
+  const cancelAllOrders = useCallback(async () => {
+    if (!clobClient) {
+      throw new Error("CLOB client not initialized");
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await clobClient.cancelAll();
+      queryClient.invalidateQueries({ queryKey: ["active-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["open-orders"] });
+      return { success: true };
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error("Failed to cancel all orders");
+      setError(error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [clobClient, queryClient]);
+
   return {
     submitOrder,
     cancelOrder,
+    cancelMultipleOrders,
+    cancelAllOrders,
     isSubmitting,
     error,
     orderId,

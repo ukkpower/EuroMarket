@@ -64,8 +64,8 @@ export function Sidebar({ isMobile = false }: SidebarProps) {
 
     const handleCategoryClick = () => {
       setActiveCategory(item.id);
-      // Navigate to markets page if we're on an event page
-      if (pathname?.startsWith('/event/')) {
+      // Navigate to markets page when not already there (e.g. profile, portfolio, event)
+      if (pathname !== '/markets') {
         router.push('/markets');
       }
     };

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, Moon, Sun, HelpCircle, LogIn, LogOut, Wallet, User, Copy, Check } from 'lucide-react';
+import { Menu, Moon, Sun, HelpCircle, LogIn, LogOut, Wallet, User, Briefcase, Copy, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -176,6 +176,14 @@ export function Header() {
 
                     {/* Menu Items */}
                     <div className="p-1">
+                      <Link
+                        href="/portfolio"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-secondary/50 transition-colors"
+                      >
+                        <Briefcase className="h-4 w-4" />
+                        Portfolio
+                      </Link>
                       <Link
                         href="/profile"
                         onClick={() => setIsUserMenuOpen(false)}

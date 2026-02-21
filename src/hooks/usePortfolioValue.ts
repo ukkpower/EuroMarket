@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTrading } from "@/providers/TradingProvider";
+import type { EnhancedPortfolioData, EnhancedPosition } from "@/types/trading";
 
 export interface Position {
   market: string;
@@ -22,8 +23,18 @@ export interface PortfolioData {
   positionCount: number;
 }
 
+const EMPTY_PORTFOLIO: EnhancedPortfolioData = {
+  totalValue: 0,
+  totalPnl: 0,
+  positions: [],
+  positionCount: 0,
+  activePositions: [],
+  resolvedPositions: [],
+  claimablePositions: [],
+};
+
 export default function usePortfolioValue() {
-  const { safeAddress, clobClient } = useTrading();
+  const { safeAddress } = useTrading();
 
   const {
     data: portfolio,
@@ -32,24 +43,29 @@ export default function usePortfolioValue() {
     refetch,
   } = useQuery({
     queryKey: ["portfolio-value", safeAddress],
-    queryFn: async (): Promise<PortfolioData> => {
-      if (!safeAddress) {
-        return { totalValue: 0, totalPnl: 0, positions: [], positionCount: 0 };
-      }
+    queryFn: async (): Promise<EnhancedPortfolioData> => {
+      if (!safeAddress) return EMPTY_PORTFOLIO;
 
       try {
         const res = await fetch(
           `/api/polymarket/positions?address=${safeAddress}`
         );
 
-        if (!res.ok) {
-          return { totalValue: 0, totalPnl: 0, positions: [], positionCount: 0 };
-        }
+        if (!res.ok) return EMPTY_PORTFOLIO;
 
         const data = await res.json();
-        return data as PortfolioData;
+
+        return {
+          totalValue: data.totalValue ?? 0,
+          totalPnl: data.totalPnl ?? 0,
+          positions: (data.positions ?? []) as EnhancedPosition[],
+          positionCount: data.positionCount ?? 0,
+          activePositions: (data.activePositions ?? []) as EnhancedPosition[],
+          resolvedPositions: (data.resolvedPositions ?? []) as EnhancedPosition[],
+          claimablePositions: (data.claimablePositions ?? []) as EnhancedPosition[],
+        };
       } catch {
-        return { totalValue: 0, totalPnl: 0, positions: [], positionCount: 0 };
+        return EMPTY_PORTFOLIO;
       }
     },
     enabled: !!safeAddress,
@@ -58,12 +74,7 @@ export default function usePortfolioValue() {
   });
 
   return {
-    portfolio: portfolio ?? {
-      totalValue: 0,
-      totalPnl: 0,
-      positions: [],
-      positionCount: 0,
-    },
+    portfolio: portfolio ?? EMPTY_PORTFOLIO,
     isLoading,
     error,
     refetch,
