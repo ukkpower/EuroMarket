@@ -83,8 +83,8 @@ export function Header() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">€</span>
             </div>
-            <span className="font-bold text-xl hidden sm:block">
-              Euro<span className="text-primary">Bourse</span>
+            <span className="text-xl hidden sm:block">
+              Euro<span className="text-primary font-bold">Market</span>
             </span>
           </motion.div>
         </Link>
