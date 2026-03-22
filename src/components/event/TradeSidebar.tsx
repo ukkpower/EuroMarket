@@ -11,7 +11,7 @@ import { useOrderBook } from '@/hooks/useOrderBook';
 import { useWallet } from '@/providers/WalletContext';
 import { useTrading } from '@/providers/TradingProvider';
 import useClobOrder from '@/hooks/useClobOrder';
-import type { ParsedMarket, TradeSide, OrderType } from '@/types/market';
+import type { ParsedMarket, OrderType } from '@/types/market';
 import { cn } from '@/lib/utils';
 
 type TradeSidebarProps = {
@@ -118,13 +118,12 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
   };
 
   return (
-    <div className="w-full lg:w-[340px] shrink-0">
-      <div className="lg:fixed lg:top-20 lg:right-6 lg:w-[340px] lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:z-40">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-card rounded-2xl border border-border/50 p-5 space-y-5"
-        >
+    <div className="w-full lg:w-[340px] lg:sticky lg:top-[7rem] lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:z-30 shrink-0">
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="bg-card rounded-2xl border border-border/50 p-5 space-y-5"
+      >
           {/* Buy/Sell Toggle + Order Type Dropdown */}
           <div className="flex items-center justify-between">
             {/* Buy/Sell Toggle */}
@@ -341,8 +340,7 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
               Safe: {safeAddress.slice(0, 6)}...{safeAddress.slice(-4)}
             </p>
           )}
-        </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -350,38 +348,36 @@ export function TradeSidebar({ market }: TradeSidebarProps) {
 // Skeleton for loading state
 export function TradeSidebarSkeleton() {
   return (
-    <div className="w-full lg:w-[340px] shrink-0">
-      <div className="lg:fixed lg:top-20 lg:right-6 lg:w-[340px] lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto lg:z-40">
-        <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-5">
-          {/* Buy/Sell + Order Type skeleton */}
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <div className="h-6 w-10 bg-secondary animate-pulse rounded" />
-              <div className="h-6 w-10 bg-secondary animate-pulse rounded" />
-            </div>
-            <div className="h-6 w-16 bg-secondary animate-pulse rounded" />
+    <div className="w-full lg:w-[340px] lg:sticky lg:top-[7rem] lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:z-30 shrink-0">
+      <div className="bg-card rounded-2xl border border-border/50 p-5 space-y-5">
+        {/* Buy/Sell + Order Type skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <div className="h-6 w-10 bg-secondary animate-pulse rounded" />
+            <div className="h-6 w-10 bg-secondary animate-pulse rounded" />
           </div>
+          <div className="h-6 w-16 bg-secondary animate-pulse rounded" />
+        </div>
 
-          {/* Outcome selector skeleton */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="h-14 bg-success/10 animate-pulse rounded-xl" />
-            <div className="h-14 bg-secondary animate-pulse rounded-xl" />
-          </div>
-
-          {/* Amount skeleton */}
-          <div className="space-y-2">
-            <div className="h-4 w-14 bg-secondary animate-pulse rounded" />
-            <div className="h-14 bg-secondary animate-pulse rounded-xl" />
-            <div className="flex gap-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex-1 h-10 bg-secondary animate-pulse rounded-lg" />
-              ))}
-            </div>
-          </div>
-
-          {/* Button skeleton */}
+        {/* Outcome selector skeleton */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-14 bg-success/10 animate-pulse rounded-xl" />
           <div className="h-14 bg-secondary animate-pulse rounded-xl" />
         </div>
+
+        {/* Amount skeleton */}
+        <div className="space-y-2">
+          <div className="h-4 w-14 bg-secondary animate-pulse rounded" />
+          <div className="h-14 bg-secondary animate-pulse rounded-xl" />
+          <div className="flex gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex-1 h-10 bg-secondary animate-pulse rounded-lg" />
+            ))}
+          </div>
+        </div>
+
+        {/* Button skeleton */}
+        <div className="h-14 bg-secondary animate-pulse rounded-xl" />
       </div>
     </div>
   );

@@ -2,13 +2,16 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, Moon, Sun, HelpCircle, LogIn, LogOut, Wallet, User, Briefcase, Copy, Check } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { SearchBar } from '@/components/SearchBar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Sidebar } from './Sidebar';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { useWallet } from '@/providers/WalletContext';
 import { useTrading } from '@/providers/TradingProvider';
 
@@ -17,16 +20,17 @@ function truncateAddress(address: string): string {
 }
 
 export function Header() {
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
-  const [currency, setCurrency] = useState<'EUR' | 'EURC'>('EUR');
+  const pathname = usePathname();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const showMobileSidebarMenu = !/^\/markets\/(trending|new)(?:\/|$)/.test(pathname);
 
   const { eoaAddress, isConnected, connect, disconnect, email } = useWallet();
   const { safeAddress } = useTrading();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -54,18 +58,20 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full glass border-b border-border/50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        {/* Mobile Menu */}
-        <Sheet>
-          <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon" className="shrink-0">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
-            <Sidebar isMobile />
-          </SheetContent>
-        </Sheet>
+        {/* Mobile Menu - opens sidebar with subcategories */}
+        {showMobileSidebarMenu && (
+          <Sheet>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" className="shrink-0">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">{t('header.toggleMenu')}</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0">
+              <Sidebar isMobile />
+            </SheetContent>
+          </Sheet>
+        )}
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -90,26 +96,12 @@ export function Header() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
-          {/* Currency Toggle */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setCurrency(currency === 'EUR' ? 'EURC' : 'EUR')}
-            className="hidden sm:flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full bg-secondary hover:bg-secondary/80 transition-colors"
-          >
-            <span className={currency === 'EUR' ? 'text-primary' : 'text-muted-foreground'}>
-              EUR
-            </span>
-            <span className="text-muted-foreground">/</span>
-            <span className={currency === 'EURC' ? 'text-primary' : 'text-muted-foreground'}>
-              EURC
-            </span>
-          </motion.button>
+          <LanguageSwitcher className="hidden sm:block" />
 
           {/* How it works */}
           <Button variant="ghost" size="sm" className="hidden md:flex gap-1">
             <HelpCircle className="h-4 w-4" />
-            <span className="hidden lg:inline">How it works</span>
+            <span className="hidden lg:inline">{t('header.howItWorks')}</span>
           </Button>
 
           {/* Theme Toggle */}
@@ -120,10 +112,10 @@ export function Header() {
           >
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
+            <span className="sr-only">{t('header.toggleTheme')}</span>
           </Button>
 
-          {/* Auth Section - always visible on all screen sizes */}
+          {/* Auth Section */}
           {isConnected && eoaAddress ? (
             <div className="relative shrink-0" ref={menuRef}>
               <motion.button
@@ -151,7 +143,6 @@ export function Header() {
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 top-full mt-2 z-50 w-64 bg-card border border-border rounded-xl shadow-lg overflow-hidden"
                   >
-                    {/* User Info */}
                     <div className="p-3 border-b border-border/50">
                       {email && (
                         <p className="text-sm font-medium truncate">{email}</p>
@@ -174,7 +165,6 @@ export function Header() {
                       </div>
                     </div>
 
-                    {/* Menu Items */}
                     <div className="p-1">
                       <Link
                         href="/portfolio"
@@ -182,7 +172,7 @@ export function Header() {
                         className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-secondary/50 transition-colors"
                       >
                         <Briefcase className="h-4 w-4" />
-                        Portfolio
+                        {t('header.portfolio')}
                       </Link>
                       <Link
                         href="/profile"
@@ -190,14 +180,14 @@ export function Header() {
                         className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-secondary/50 transition-colors"
                       >
                         <User className="h-4 w-4" />
-                        Profile
+                        {t('header.profile')}
                       </Link>
                       <button
                         onClick={handleDisconnect}
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-secondary/50 transition-colors text-danger"
                       >
                         <LogOut className="h-4 w-4" />
-                        Log out
+                        {t('header.logOut')}
                       </button>
                     </div>
                   </motion.div>
@@ -209,7 +199,7 @@ export function Header() {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="shrink-0">
                 <Button size="sm" className="gap-1 bg-primary hover:bg-primary/90 shrink-0" onClick={connect}>
                   <LogIn className="h-4 w-4" />
-                  <span className="hidden md:inline">Log in</span>
+                  <span className="hidden md:inline">{t('header.logIn')}</span>
                 </Button>
               </motion.div>
             </div>

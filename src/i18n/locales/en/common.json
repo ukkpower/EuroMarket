@@ -1,0 +1,211 @@
+{
+  "language": {
+    "label": "Language",
+    "selectLanguage": "Select language",
+    "options": {
+      "en": "English",
+      "fr": "French",
+      "de": "German"
+    }
+  },
+  "header": {
+    "toggleMenu": "Toggle menu",
+    "howItWorks": "How it works",
+    "toggleTheme": "Toggle theme",
+    "portfolio": "Portfolio",
+    "profile": "Profile",
+    "logIn": "Log in",
+    "logOut": "Log out"
+  },
+  "categories": {
+    "short": {
+      "trending": "Trending",
+      "new": "New",
+      "ireland": "Ireland",
+      "europe": "Europe",
+      "sports": "Sports",
+      "politics": "Politics",
+      "crypto": "Crypto",
+      "finance": "Finance",
+      "geopolitics": "Geopolitics",
+      "tech": "Tech",
+      "culture": "Culture",
+      "science": "Science",
+      "mentions": "Mentions"
+    },
+    "title": {
+      "trending": "Trending Markets",
+      "new": "New Markets",
+      "ireland": "Ireland",
+      "europe": "Europe",
+      "sports": "Sports",
+      "politics": "Politics",
+      "crypto": "Crypto",
+      "finance": "Finance",
+      "geopolitics": "Geopolitics",
+      "tech": "Tech",
+      "culture": "Culture",
+      "science": "Science",
+      "mentions": "Mentions"
+    }
+  },
+  "sidebar": {
+    "all": "All",
+    "loading": "Loading...",
+    "helpSupport": "Help & Support",
+    "sections": {
+      "allSports": "All Sports"
+    },
+    "sportsTop": {
+      "live": "Live",
+      "futures": "Futures"
+    },
+    "items": {
+      "all": "All",
+      "football": "Football",
+      "rugby": "Rugby",
+      "tennis": "Tennis",
+      "basketball": "Basketball",
+      "ice-hockey": "Ice Hockey",
+      "baseball": "Baseball",
+      "combat-sports": "Combat Sports",
+      "esports": "Esports",
+      "formula-1": "Formula 1",
+      "cycling": "Cycling",
+      "golf": "Golf",
+      "boxing": "Boxing",
+      "cricket": "Cricket",
+      "horse-racing": "Horse Racing",
+      "darts": "Darts",
+      "snooker": "Snooker",
+      "handball": "Handball",
+      "athletics": "Athletics",
+      "motorsports": "Motorsports",
+      "american-football": "American Football",
+      "stocks": "Stocks",
+      "earnings": "Earnings",
+      "indices": "Indices",
+      "economic-indicators": "Economic Indicators",
+      "commodities": "Commodities",
+      "forex": "Forex",
+      "collectibles": "Collectibles",
+      "acquisitions": "Acquisitions",
+      "earnings-calls": "Earnings Calls",
+      "ipos": "IPOs",
+      "rates-decisions": "Rates Decisions",
+      "prediction-markets": "Prediction Markets",
+      "treasuries": "Treasuries",
+      "5-min": "5 Min",
+      "15-min": "15 Min",
+      "hourly": "1 Hour",
+      "4-hour": "4 Hour",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "pre-market": "Pre-Market"
+    }
+  },
+  "subFilterBar": {
+    "quick": {
+      "all": "All",
+      "endingSoon": "Ending Soon",
+      "new": "New",
+      "highVolume": "High Volume",
+      "highLiquidity": "High Liquidity"
+    },
+    "advanced": {
+      "minLiquidity": "Min Liquidity $100K",
+      "closingSoon": "Closing Soon",
+      "highVolatility": "High Volatility"
+    },
+    "controls": {
+      "sortBy": "Sort by",
+      "status": "Market status",
+      "sortOptions": {
+        "volume24hr": "24hr Volume",
+        "createdAt": "New",
+        "volume": "Total Volume",
+        "liquidity": "Liquidity",
+        "endingSoon": "Ending Soon"
+      },
+      "statusOptions": {
+        "active": "Active",
+        "resolved": "Resolved"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Search EU elections, Football, Eurovision...",
+    "recentSearches": "Recent searches",
+    "clear": "Clear",
+    "clearInput": "Clear search input",
+    "startSearchingTitle": "Start searching markets",
+    "startSearchingHint": "Use the header search to find Polymarket events.",
+    "resultsFor": "Search results for \"{{query}}\"",
+    "resultsCount": "{{formattedCount}} results",
+    "searchFailed": "Search failed",
+    "searchFailedHint": "An error occurred while searching.",
+    "noMarketsFound": "No markets found",
+    "noMarketsHint": "Try a broader keyword or a different topic."
+  },
+  "marketGrid": {
+    "failedTitle": "Failed to load markets",
+    "failedHint": "An error occurred while fetching markets.",
+    "noMarketsTitle": "No markets found",
+    "noMarketsHint": "Try adjusting your filters to find more markets."
+  },
+  "marketCard": {
+    "yes": "Yes",
+    "no": "No",
+    "volumeShort": "Vol.",
+    "moreCount": "+{{count}} more",
+    "resolution": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    }
+  },
+  "bookmarks": {
+    "title": "Bookmarks",
+    "count": "{{count}} bookmarked items",
+    "loginTitle": "Log in to view bookmarks",
+    "loginHint": "Bookmarks are saved per account on this device.",
+    "loginCta": "Log in",
+    "emptyTitle": "No bookmarks yet",
+    "emptyHint": "Bookmark an event or market from cards or event pages to find it here.",
+    "menuLabel": "Bookmarks",
+    "menuAria": "Open bookmarks",
+    "addAria": "Add bookmark",
+    "removeAria": "Remove bookmark"
+  },
+  "footer": {
+    "stats": {
+      "totalVolumeLocked": "Total Volume Locked",
+      "activeTraders": "Active Traders",
+      "activeMarkets": "Active Markets"
+    },
+    "sections": {
+      "platform": "Platform",
+      "resources": "Resources",
+      "legal": "Legal",
+      "community": "Community"
+    },
+    "links": {
+      "howItWorks": "How it works",
+      "markets": "Markets",
+      "leaderboard": "Leaderboard",
+      "apiDocs": "API Docs",
+      "helpCenter": "Help Center",
+      "blog": "Blog",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "cookie": "Cookie Policy",
+      "twitter": "X (Twitter)",
+      "discord": "Discord"
+    },
+    "micaCompliant": "MiCA Compliant",
+    "complianceNotice": "EuroBourse is a prediction market platform operating under the Markets in Crypto-Assets (MiCA) regulatory framework. Trading involves risk. Past performance does not guarantee future results. Please trade responsibly.",
+    "rightsReserved": "All rights reserved."
+  }
+}

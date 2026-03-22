@@ -1,0 +1,211 @@
+{
+  "language": {
+    "label": "Langue",
+    "selectLanguage": "Choisir la langue",
+    "options": {
+      "en": "Anglais",
+      "fr": "Français",
+      "de": "Allemand"
+    }
+  },
+  "header": {
+    "toggleMenu": "Ouvrir le menu",
+    "howItWorks": "Comment ça marche",
+    "toggleTheme": "Changer de thème",
+    "portfolio": "Portefeuille",
+    "profile": "Profil",
+    "logIn": "Se connecter",
+    "logOut": "Se déconnecter"
+  },
+  "categories": {
+    "short": {
+      "trending": "Tendance",
+      "new": "Nouveaux",
+      "ireland": "Irlande",
+      "europe": "Europe",
+      "sports": "Sports",
+      "politics": "Politique",
+      "crypto": "Crypto",
+      "finance": "Finance",
+      "geopolitics": "Géopolitique",
+      "tech": "Tech",
+      "culture": "Culture",
+      "science": "Science",
+      "mentions": "Mentions"
+    },
+    "title": {
+      "trending": "Marchés en tendance",
+      "new": "Nouveaux marchés",
+      "ireland": "Irlande",
+      "europe": "Europe",
+      "sports": "Sports",
+      "politics": "Politique",
+      "crypto": "Crypto",
+      "finance": "Finance",
+      "geopolitics": "Géopolitique",
+      "tech": "Tech",
+      "culture": "Culture",
+      "science": "Science",
+      "mentions": "Mentions"
+    }
+  },
+  "sidebar": {
+    "all": "Tout",
+    "loading": "Chargement...",
+    "helpSupport": "Aide et support",
+    "sections": {
+      "allSports": "Tous les sports"
+    },
+    "sportsTop": {
+      "live": "En direct",
+      "futures": "Futures"
+    },
+    "items": {
+      "all": "Tout",
+      "football": "Football",
+      "rugby": "Rugby",
+      "tennis": "Tennis",
+      "basketball": "Basket-ball",
+      "ice-hockey": "Hockey sur glace",
+      "baseball": "Baseball",
+      "combat-sports": "Sports de combat",
+      "esports": "Esports",
+      "formula-1": "Formule 1",
+      "cycling": "Cyclisme",
+      "golf": "Golf",
+      "boxing": "Boxe",
+      "cricket": "Cricket",
+      "horse-racing": "Courses hippiques",
+      "darts": "Fléchettes",
+      "snooker": "Snooker",
+      "handball": "Handball",
+      "athletics": "Athlétisme",
+      "motorsports": "Sports mécaniques",
+      "american-football": "Football américain",
+      "stocks": "Actions",
+      "earnings": "Résultats",
+      "indices": "Indices",
+      "economic-indicators": "Indicateurs économiques",
+      "commodities": "Matières premières",
+      "forex": "Forex",
+      "collectibles": "Objets de collection",
+      "acquisitions": "Acquisitions",
+      "earnings-calls": "Conférences résultats",
+      "ipos": "IPO",
+      "rates-decisions": "Décisions de taux",
+      "prediction-markets": "Marchés prédictifs",
+      "treasuries": "Bons du Trésor",
+      "5-min": "5 min",
+      "15-min": "15 min",
+      "hourly": "1 heure",
+      "4-hour": "4 heures",
+      "daily": "Quotidien",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "pre-market": "Pré-marché"
+    }
+  },
+  "subFilterBar": {
+    "quick": {
+      "all": "Tout",
+      "endingSoon": "Bientôt terminé",
+      "new": "Nouveaux",
+      "highVolume": "Fort volume",
+      "highLiquidity": "Forte liquidité"
+    },
+    "advanced": {
+      "minLiquidity": "Liquidité min. 100 k$",
+      "closingSoon": "Clôture imminente",
+      "highVolatility": "Forte volatilité"
+    },
+    "controls": {
+      "sortBy": "Trier par",
+      "status": "Statut du marché",
+      "sortOptions": {
+        "volume24hr": "Volume 24 h",
+        "createdAt": "Nouveaux",
+        "volume": "Volume total",
+        "liquidity": "Liquidité",
+        "endingSoon": "Bientôt terminé"
+      },
+      "statusOptions": {
+        "active": "Actif",
+        "resolved": "Résolu"
+      }
+    }
+  },
+  "search": {
+    "placeholder": "Rechercher élections UE, football, Eurovision...",
+    "recentSearches": "Recherches récentes",
+    "clear": "Effacer",
+    "clearInput": "Effacer la recherche",
+    "startSearchingTitle": "Commencez à rechercher des marchés",
+    "startSearchingHint": "Utilisez la recherche d’en-tête pour trouver des événements Polymarket.",
+    "resultsFor": "Résultats de recherche pour \"{{query}}\"",
+    "resultsCount": "{{formattedCount}} résultats",
+    "searchFailed": "Échec de la recherche",
+    "searchFailedHint": "Une erreur s’est produite pendant la recherche.",
+    "noMarketsFound": "Aucun marché trouvé",
+    "noMarketsHint": "Essayez un mot-clé plus large ou un autre sujet."
+  },
+  "marketGrid": {
+    "failedTitle": "Échec du chargement des marchés",
+    "failedHint": "Une erreur est survenue lors du chargement des marchés.",
+    "noMarketsTitle": "Aucun marché trouvé",
+    "noMarketsHint": "Essayez d’ajuster vos filtres pour trouver plus de marchés."
+  },
+  "marketCard": {
+    "yes": "Oui",
+    "no": "Non",
+    "volumeShort": "Vol.",
+    "moreCount": "+{{count}} de plus",
+    "resolution": {
+      "daily": "Quotidien",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel"
+    }
+  },
+  "bookmarks": {
+    "title": "Favoris",
+    "count": "{{count}} favoris",
+    "loginTitle": "Connectez-vous pour voir vos favoris",
+    "loginHint": "Les favoris sont enregistrés par compte sur cet appareil.",
+    "loginCta": "Se connecter",
+    "emptyTitle": "Aucun favori pour le moment",
+    "emptyHint": "Ajoutez un événement ou un marché en favori depuis les cartes ou la page événement.",
+    "menuLabel": "Favoris",
+    "menuAria": "Ouvrir les favoris",
+    "addAria": "Ajouter aux favoris",
+    "removeAria": "Retirer des favoris"
+  },
+  "footer": {
+    "stats": {
+      "totalVolumeLocked": "Volume total verrouillé",
+      "activeTraders": "Traders actifs",
+      "activeMarkets": "Marchés actifs"
+    },
+    "sections": {
+      "platform": "Plateforme",
+      "resources": "Ressources",
+      "legal": "Légal",
+      "community": "Communauté"
+    },
+    "links": {
+      "howItWorks": "Comment ça marche",
+      "markets": "Marchés",
+      "leaderboard": "Classement",
+      "apiDocs": "Documentation API",
+      "helpCenter": "Centre d’aide",
+      "blog": "Blog",
+      "terms": "Conditions d’utilisation",
+      "privacy": "Politique de confidentialité",
+      "cookie": "Politique de cookies",
+      "twitter": "X (Twitter)",
+      "discord": "Discord"
+    },
+    "micaCompliant": "Conforme MiCA",
+    "complianceNotice": "EuroBourse est une plateforme de marchés prédictifs opérant dans le cadre réglementaire MiCA (Markets in Crypto-Assets). Le trading comporte des risques. Les performances passées ne garantissent pas les résultats futurs. Tradez de manière responsable.",
+    "rightsReserved": "Tous droits réservés."
+  }
+}

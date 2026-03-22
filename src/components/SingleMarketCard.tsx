@@ -4,27 +4,60 @@ import { motion } from 'framer-motion';
 import { Bookmark, RefreshCw, Gift } from 'lucide-react';
 import Link from 'next/link';
 import { ChanceGauge } from './ChanceGauge';
-import { formatVolume } from '@/hooks/usePolymarketEvents';
+import { useTranslation } from 'react-i18next';
 import type { ParsedEvent } from '@/types/market';
+import { formatCompactCurrency } from '@/lib/intl';
+import { useBookmarks } from '@/hooks/useBookmarks';
 import { cn } from '@/lib/utils';
+import { getEffectiveMarketEndDate } from '@/lib/marketStatus';
+import {
+  getDrawCardButtonLabels,
+  getDrawCardOutcomePercentages,
+  getTwoWayCardLabels,
+  isDrawMatchEvent,
+} from '@/lib/sportsCardMeta';
 
 type SingleMarketCardProps = {
   event: ParsedEvent;
+  preferredMarketId?: string | null;
 };
 
-export function SingleMarketCard({ event }: SingleMarketCardProps) {
-  const market = event.topMarket;
+export function SingleMarketCard({ event, preferredMarketId }: SingleMarketCardProps) {
+  const { t, i18n } = useTranslation();
+  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const market =
+    (preferredMarketId
+      ? event.markets.find((item) => item.id === preferredMarketId)
+      : null) ?? event.topMarket;
   
   if (!market) return null;
+  const bookmarkMarketId = preferredMarketId ?? market.id ?? null;
+  const bookmarked = isBookmarked(event.id, bookmarkMarketId);
+  const eventHref = bookmarkMarketId
+    ? `/event/${event.slug}?market=${encodeURIComponent(bookmarkMarketId)}`
+    : `/event/${event.slug}`;
 
   // Determine resolution frequency based on end date
-  const endDate = new Date(market.endDate);
+  const endDate = getEffectiveMarketEndDate(market);
   const now = new Date();
-  const daysUntilEnd = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const resolutionType = daysUntilEnd <= 1 ? 'Daily' : daysUntilEnd <= 7 ? 'Weekly' : 'Monthly';
+  const daysUntilEnd = endDate
+    ? Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    : 30;
+  const resolutionKey = daysUntilEnd <= 1 ? 'daily' : daysUntilEnd <= 7 ? 'weekly' : 'monthly';
+  const displayVolume = formatCompactCurrency(event.volume, i18n.resolvedLanguage || i18n.language);
+  const drawMatchEvent = isDrawMatchEvent(event);
+  const [drawLeftLabel, drawMiddleLabel, drawRightLabel] = getDrawCardButtonLabels(event);
+  const [drawLeftChance, drawMiddleChance, drawRightChance] = getDrawCardOutcomePercentages(event);
+  const twoWayLabels = getTwoWayCardLabels(event, market);
+  const showButtonPercentages = drawMatchEvent || Boolean(twoWayLabels);
+  const leftLabel = drawMatchEvent ? drawLeftLabel : (twoWayLabels?.[0] ?? t('marketCard.yes'));
+  const rightLabel = drawMatchEvent ? drawRightLabel : (twoWayLabels?.[1] ?? t('marketCard.no'));
+  const leftChance = drawMatchEvent ? drawLeftChance : market.probability;
+  const middleChance = drawMatchEvent ? drawMiddleChance : null;
+  const rightChance = drawMatchEvent ? drawRightChance : Math.round(Math.max(0, Math.min(1, market.noPrice)) * 100);
 
   return (
-    <Link href={`/event/${event.slug}`} className="h-full">
+    <Link href={eventHref} className="h-full">
       <motion.div
         layout
         layoutId={event.id}
@@ -73,7 +106,7 @@ export function SingleMarketCard({ event }: SingleMarketCardProps) {
         <ChanceGauge probability={market.probability} size="md" />
       </div>
 
-      {/* Yes/No Buttons */}
+      {/* Outcome Buttons */}
       <div className="flex gap-2 mb-4 flex-grow">
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -81,41 +114,80 @@ export function SingleMarketCard({ event }: SingleMarketCardProps) {
           onClick={(e) => e.preventDefault()}
           className="flex-1 flex items-center justify-center px-4 py-2.5 rounded-xl bg-success/10 hover:bg-success/20 border border-success/20 transition-colors"
         >
-          <span className="text-sm font-semibold text-success">Yes</span>
+          <span className="flex flex-col items-center leading-tight">
+            <span className="text-sm font-semibold text-success">{leftLabel}</span>
+            {showButtonPercentages && (
+              <span className="text-[11px] font-medium text-success/80">{leftChance}%</span>
+            )}
+          </span>
         </motion.button>
+        {drawMatchEvent && (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={(e) => e.preventDefault()}
+            className="flex-1 flex items-center justify-center px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
+          >
+            <span className="flex flex-col items-center leading-tight">
+              <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                {drawMiddleLabel}
+              </span>
+              {showButtonPercentages && (
+                <span className="text-[11px] font-medium text-amber-700/80 dark:text-amber-300/80">
+                  {middleChance ?? 0}%
+                </span>
+              )}
+            </span>
+          </motion.button>
+        )}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={(e) => e.preventDefault()}
           className="flex-1 flex items-center justify-center px-4 py-2.5 rounded-xl bg-danger/10 hover:bg-danger/20 border border-danger/20 transition-colors"
         >
-          <span className="text-sm font-semibold text-danger">No</span>
+          <span className="flex flex-col items-center leading-tight">
+            <span className="text-sm font-semibold text-danger">{rightLabel}</span>
+            {showButtonPercentages && (
+              <span className="text-[11px] font-medium text-danger/80">{rightChance}%</span>
+            )}
+          </span>
         </motion.button>
       </div>
 
       {/* Footer: Volume + Resolution + Actions */}
       <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto">
         <div className="flex items-center gap-2">
-          <span className="font-medium">{formatVolume(event.volume)} Vol.</span>
+          <span className="font-medium">{displayVolume} {t('marketCard.volumeShort')}</span>
           <span className="flex items-center gap-1">
             <RefreshCw className="h-3 w-3" />
-            {resolutionType}
+            {t(`marketCard.resolution.${resolutionKey}`)}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <button 
             className="p-1 rounded hover:bg-secondary transition-colors"
             aria-label="Gift"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             <Gift className="h-4 w-4" />
           </button>
           <button 
-            className="p-1 rounded hover:bg-secondary transition-colors"
-            aria-label="Bookmark"
-            onClick={(e) => e.preventDefault()}
+            className={cn(
+              'p-1 rounded transition-colors hover:bg-secondary',
+              bookmarked && 'text-primary'
+            )}
+            aria-label={bookmarked ? t('bookmarks.removeAria') : t('bookmarks.addAria')}
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              await toggleBookmark({ event, marketId: bookmarkMarketId });
+            }}
           >
-            <Bookmark className="h-4 w-4" />
+            <Bookmark className={cn('h-4 w-4', bookmarked && 'fill-current')} />
           </button>
         </div>
       </div>

@@ -9,32 +9,39 @@ const initialAdvancedFilters: AdvancedFilters = {
 
 export const useMarketStore = create<MarketStore>((set) => ({
   activeCategory: 'trending',
-  subFilters: [],
-  searchQuery: '',
+  activeSubFilterId: null,
+  activeSportsTopFilter: null,
   advancedFilters: initialAdvancedFilters,
-  
-  setActiveCategory: (category: Category) => 
-    set({ activeCategory: category, subFilters: [] }),
-  
-  toggleSubFilter: (filterId: string) =>
-    set((state) => ({
-      subFilters: state.subFilters.includes(filterId)
-        ? state.subFilters.filter((id) => id !== filterId)
-        : [...state.subFilters, filterId],
-    })),
-  
-  setSearchQuery: (query: string) => set({ searchQuery: query }),
-  
+  sortOption: 'volume24hr',
+  statusFilter: 'active',
+
+  setActiveCategory: (category: Category) =>
+    set({
+      activeCategory: category,
+      activeSubFilterId: null,
+      activeSportsTopFilter: null,
+    }),
+
+  setActiveSubFilterId: (id: string | null) => set({ activeSubFilterId: id }),
+
+  setActiveSportsTopFilter: (filter) => set({ activeSportsTopFilter: filter }),
+
   setAdvancedFilter: (key: keyof AdvancedFilters, value: boolean) =>
     set((state) => ({
       advancedFilters: { ...state.advancedFilters, [key]: value },
     })),
-  
+
+  setSortOption: (option) => set({ sortOption: option }),
+
+  setStatusFilter: (filter) => set({ statusFilter: filter }),
+
   resetFilters: () =>
     set({
       activeCategory: 'trending',
-      subFilters: [],
+      activeSubFilterId: null,
+      activeSportsTopFilter: null,
       advancedFilters: initialAdvancedFilters,
-      searchQuery: '',
+      sortOption: 'volume24hr',
+      statusFilter: 'active',
     }),
 }));

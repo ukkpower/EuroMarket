@@ -11,12 +11,25 @@ export type Category =
   | 'geopolitics'
   | 'tech'
   | 'culture'
-  | 'science';
+  | 'science'
+  | 'mentions';
+
+export type SportsTopFilter = 'live' | 'futures';
+
+export type MarketSortOption =
+  | 'volume24hr'
+  | 'createdAt'
+  | 'volume'
+  | 'liquidity'
+  | 'endingSoon';
+
+export type MarketStatusFilter = 'active' | 'resolved';
 
 export type SubFilter = {
   id: string;
   label: string;
   category: Category;
+  tagId?: string | null;
 };
 
 // Category to Polymarket tag ID mapping
@@ -34,6 +47,7 @@ export const CATEGORY_TO_TAG_ID: Record<Category, string | null> = {
   tech: '1401',        // Tech tag
   culture: '596',      // Culture tag (pop-culture)
   science: '74',       // Science tag
+  mentions: '100343',  // Mentions tag
 };
 
 // Polymarket API Types
@@ -50,20 +64,52 @@ export type PolymarketMarket = {
   conditionId: string;
   slug: string;
   endDate: string;
+  endDateIso?: string;
   description: string;
+  createdAt?: string;
+  updatedAt?: string;
   outcomes: string; // JSON string like '["Yes", "No"]'
   outcomePrices: string; // JSON string like '[0.19, 0.81]'
   volume: string;
   liquidity: string;
   active: boolean;
   closed: boolean;
+  acceptingOrders?: boolean;
+  ended?: boolean | null;
   marketType: string;
   groupItemTitle?: string; // For multi-market events, this is the option label
   groupItemThreshold?: string;
+  questionID?: string;
+  negRisk?: boolean;
+  negRiskRequestID?: string;
+  resolvedBy?: string;
+  umaResolutionStatuses?: string;
+  // Keep these optional because Gamma can add/remove fields over time.
+  resolutionStatus?: string;
+  finalReviewEnd?: string;
+  finalReviewEndsAt?: string;
+  reviewEnd?: string;
+  livenessEndsAt?: string;
+};
+
+export type ResolutionStepKind =
+  | 'outcome_proposed'
+  | 'disputed'
+  | 'final_review'
+  | 'resolved'
+  | 'other';
+
+export type MarketResolutionStep = {
+  kind: ResolutionStepKind;
+  label: string;
+  occurredAt?: string;
+  endsAt?: string;
+  isCurrent?: boolean;
 };
 
 export type PolymarketEvent = {
   id: string;
+  ticker?: string;
   slug: string;
   title: string;
   description: string;
@@ -73,6 +119,7 @@ export type PolymarketEvent = {
   icon: string;
   active: boolean;
   closed: boolean;
+  ended?: boolean | null;
   archived: boolean;
   new: boolean;
   featured: boolean;
@@ -90,6 +137,7 @@ export type ParsedMarket = {
   question: string;
   slug: string;
   endDate: string;
+  endDateIso?: string;
   conditionId: string;
   outcomes: string[];
   outcomePrices: number[];
@@ -97,7 +145,13 @@ export type ParsedMarket = {
   liquidity: number;
   active: boolean;
   closed: boolean;
+  acceptingOrders?: boolean;
+  isEnded: boolean;
   groupItemTitle?: string;
+  resolvedBy?: string;
+  resolutionRequestId?: string;
+  isInResolution?: boolean;
+  resolutionSteps?: MarketResolutionStep[];
   yesPrice: number;
   noPrice: number;
   probability: number; // 0-100
@@ -105,6 +159,7 @@ export type ParsedMarket = {
 
 export type ParsedEvent = {
   id: string;
+  ticker?: string;
   slug: string;
   title: string;
   description: string;
@@ -173,13 +228,16 @@ export type AdvancedFilters = {
 
 export type MarketStore = {
   activeCategory: Category;
-  subFilters: string[];
-  searchQuery: string;
+  activeSubFilterId: string | null;
+  activeSportsTopFilter: SportsTopFilter | null;
   advancedFilters: AdvancedFilters;
+  sortOption: MarketSortOption;
+  statusFilter: MarketStatusFilter;
   setActiveCategory: (category: Category) => void;
-  toggleSubFilter: (filterId: string) => void;
-  setSearchQuery: (query: string) => void;
+  setActiveSubFilterId: (id: string | null) => void;
+  setActiveSportsTopFilter: (filter: SportsTopFilter | null) => void;
   setAdvancedFilter: (key: keyof AdvancedFilters, value: boolean) => void;
+  setSortOption: (option: MarketSortOption) => void;
+  setStatusFilter: (filter: MarketStatusFilter) => void;
   resetFilters: () => void;
 };
-

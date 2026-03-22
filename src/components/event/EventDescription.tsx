@@ -8,9 +8,18 @@ import { cn } from '@/lib/utils';
 type EventDescriptionProps = {
   description: string;
   rules?: string;
+  resolverAddress?: string;
 };
 
-export function EventDescription({ description, rules }: EventDescriptionProps) {
+function truncateAddress(address: string): string {
+  return `${address.slice(0, 10)}...`;
+}
+
+export function EventDescription({
+  description,
+  rules,
+  resolverAddress,
+}: EventDescriptionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'description' | 'rules'>('description');
 
@@ -19,6 +28,9 @@ export function EventDescription({ description, rules }: EventDescriptionProps) 
   const displayText = shouldTruncate && !isExpanded 
     ? description.slice(0, 300) + '...' 
     : description;
+  const hasResolverAddress = Boolean(
+    resolverAddress && /^0x[a-fA-F0-9]{40}$/.test(resolverAddress)
+  );
 
   return (
     <div className="bg-card rounded-2xl border border-border/50 overflow-hidden">
@@ -84,6 +96,28 @@ export function EventDescription({ description, rules }: EventDescriptionProps) 
                     <ChevronDown className="h-4 w-4" />
                   </motion.span>
                 </motion.button>
+              )}
+
+              {hasResolverAddress && (
+                <div className="mt-4 rounded-xl border border-border/50 bg-secondary/20 px-3 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-lg bg-[#ff4a4a]/10 text-[#ff4a4a] text-xs font-semibold tracking-wide flex items-center justify-center shrink-0">
+                      UMA
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm text-muted-foreground">Resolver</p>
+                      <a
+                        href={`https://polygonscan.com/address/${resolverAddress}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors truncate"
+                      >
+                        {truncateAddress(resolverAddress!)}
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
               )}
             </motion.div>
           ) : (

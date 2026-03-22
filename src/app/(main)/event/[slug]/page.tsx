@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 import {
   EventHeader,
@@ -17,6 +17,7 @@ import {
   PriceChartSkeleton,
   EventDescription,
   EventDescriptionSkeleton,
+  ResolutionHistoryTimeline,
 } from '@/components/event';
 import { usePolymarketEvent } from '@/hooks/usePolymarketEvents';
 import { useEventStore } from '@/store/eventStore';
@@ -24,7 +25,9 @@ import type { ParsedMarket } from '@/types/market';
 
 export default function EventPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
+  const marketFromQuery = searchParams.get('market');
 
   const { data: event, isLoading, isError, error } = usePolymarketEvent(slug);
   const { selectedMarketId, setSelectedMarket, resetTradeForm } = useEventStore();
@@ -32,12 +35,15 @@ export default function EventPage() {
   // Set initial selected market when event loads
   useEffect(() => {
     if (event && !selectedMarketId) {
-      const initialMarket = event.topMarket || event.markets[0];
+      const queryMarket = marketFromQuery
+        ? event.markets.find((item) => item.id === marketFromQuery)
+        : null;
+      const initialMarket = queryMarket || event.topMarket || event.markets[0];
       if (initialMarket) {
         setSelectedMarket(initialMarket.id);
       }
     }
-  }, [event, selectedMarketId, setSelectedMarket]);
+  }, [event, marketFromQuery, selectedMarketId, setSelectedMarket]);
 
   // Reset trade form when leaving the page
   useEffect(() => {
@@ -75,12 +81,6 @@ export default function EventPage() {
               ? error.message
               : 'The event you are looking for could not be found.'}
           </p>
-          <a
-            href="/markets"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-          >
-            Back to Markets
-          </a>
         </motion.div>
       </div>
     );
@@ -161,8 +161,25 @@ export default function EventPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
-            <EventDescription description={event.description} />
+            <EventDescription
+              description={event.description}
+              resolverAddress={selectedMarket?.resolvedBy}
+            />
           </motion.div>
+
+          {selectedMarket?.isInResolution &&
+            (selectedMarket.resolutionSteps?.length ?? 0) > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <ResolutionHistoryTimeline
+                steps={selectedMarket.resolutionSteps || []}
+                resolutionRequestId={selectedMarket.resolutionRequestId}
+              />
+            </motion.div>
+            )}
         </div>
 
         {/* Right Column - Trade Sidebar (Desktop) */}
@@ -187,7 +204,7 @@ function MobileTradBar({
   market: ParsedMarket;
   eventTitle: string;
 }) {
-  const { selectedOutcome, setSelectedOutcome } = useEventStore();
+  const { setSelectedOutcome } = useEventStore();
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border/50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] z-50">

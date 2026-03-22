@@ -3,21 +3,24 @@
 import { motion } from 'framer-motion';
 import { Bookmark } from 'lucide-react';
 import Link from 'next/link';
-import { formatVolume } from '@/hooks/usePolymarketEvents';
+import { useTranslation } from 'react-i18next';
 import type { ParsedEvent, ParsedMarket } from '@/types/market';
 import { cn } from '@/lib/utils';
+import { formatCompactCurrency } from '@/lib/intl';
+import { useBookmarks } from '@/hooks/useBookmarks';
 
 type MultiMarketCardProps = {
   event: ParsedEvent;
+  preferredMarketId?: string | null;
 };
 
 type MarketRowProps = {
   market: ParsedMarket;
-  isLast?: boolean;
   isFirst?: boolean;
 };
 
-function MarketRow({ market, isLast, isFirst }: MarketRowProps) {
+function MarketRow({ market, isFirst }: MarketRowProps) {
+  const { t } = useTranslation();
   // Format the label - use groupItemTitle or extract from question
   const label = market.groupItemTitle || market.question;
   
@@ -44,7 +47,7 @@ function MarketRow({ market, isLast, isFirst }: MarketRowProps) {
           onClick={(e) => e.preventDefault()}
           className="w-12 px-3 py-1 rounded-lg bg-success/10 hover:bg-success/20 border border-success/20 transition-colors leading-normal"
         >
-          <span className="text-xs font-semibold text-success">Yes</span>
+          <span className="text-xs font-semibold text-success">{t('marketCard.yes')}</span>
         </motion.button>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -52,21 +55,30 @@ function MarketRow({ market, isLast, isFirst }: MarketRowProps) {
           onClick={(e) => e.preventDefault()}
           className="w-12 px-3 py-1 rounded-lg bg-danger/10 hover:bg-danger/20 border border-danger/20 transition-colors leading-normal"
         >
-          <span className="text-xs font-semibold text-danger">No</span>
+          <span className="text-xs font-semibold text-danger">{t('marketCard.no')}</span>
         </motion.button>
       </div>
     </div>
   );
 }
 
-export function MultiMarketCard({ event }: MultiMarketCardProps) {
-  // Get top 2 markets by volume
-  const topMarkets = event.markets.slice(0, 2);
+export function MultiMarketCard({ event, preferredMarketId }: MultiMarketCardProps) {
+  const { t, i18n } = useTranslation();
+  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const topMarkets = [...event.markets]
+    .sort((a, b) => (b.probability - a.probability) || (b.volume - a.volume))
+    .slice(0, 2);
+  const displayVolume = formatCompactCurrency(event.volume, i18n.resolvedLanguage || i18n.language);
+  const bookmarkMarketId = preferredMarketId ?? topMarkets[0]?.id ?? event.topMarket?.id ?? null;
+  const bookmarked = isBookmarked(event.id, bookmarkMarketId);
+  const eventHref = bookmarkMarketId
+    ? `/event/${event.slug}?market=${encodeURIComponent(bookmarkMarketId)}`
+    : `/event/${event.slug}`;
   
   if (topMarkets.length === 0) return null;
 
   return (
-    <Link href={`/event/${event.slug}`} className="h-full">
+    <Link href={eventHref} className="h-full">
       <motion.div
         layout
         layoutId={event.id}
@@ -118,7 +130,6 @@ export function MultiMarketCard({ event }: MultiMarketCardProps) {
           <MarketRow 
             key={market.id} 
             market={market} 
-            isLast={index === topMarkets.length - 1}
             isFirst={index === 0}
           />
         ))}
@@ -127,19 +138,23 @@ export function MultiMarketCard({ event }: MultiMarketCardProps) {
       {/* Footer: Volume + More indicator + Bookmark */}
       <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto">
         <div className="flex items-center gap-2">
-          <span className="font-medium">{formatVolume(event.volume)} Vol.</span>
+          <span className="font-medium">{displayVolume} {t('marketCard.volumeShort')}</span>
           {event.markets.length > 2 && (
             <span className="text-primary font-medium">
-              +{event.markets.length - 2} more
+              {t('marketCard.moreCount', { count: event.markets.length - 2 })}
             </span>
           )}
         </div>
         <button 
-          className="p-1 rounded hover:bg-secondary transition-colors"
-          aria-label="Bookmark"
-          onClick={(e) => e.preventDefault()}
+          className={cn('p-1 rounded transition-colors hover:bg-secondary', bookmarked && 'text-primary')}
+          aria-label={bookmarked ? t('bookmarks.removeAria') : t('bookmarks.addAria')}
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await toggleBookmark({ event, marketId: bookmarkMarketId });
+          }}
         >
-          <Bookmark className="h-4 w-4" />
+          <Bookmark className={cn('h-4 w-4', bookmarked && 'fill-current')} />
         </button>
       </div>
       </motion.div>

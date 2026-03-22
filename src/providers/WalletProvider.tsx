@@ -32,52 +32,72 @@ const publicClient = createPublicClient({
 });
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const [ethersSigner, setEthersSigner] =
-    useState<providers.JsonRpcSigner | null>(null);
-  const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
   const [eoaAddress, setEoaAddress] = useState<`0x${string}` | undefined>(
     undefined
   );
   const [email, setEmail] = useState<string | undefined>(undefined);
+  const magic = useMemo(() => getMagic(), []);
+  const rpcProvider = useMemo(
+    () => (magic ? (magic.rpcProvider as providers.ExternalProvider) : null),
+    [magic]
+  );
+  const walletClient = useMemo<WalletClient | null>(() => {
+    if (!rpcProvider) return null;
+
+    return createWalletClient({
+      chain: polygon,
+      transport: custom(rpcProvider),
+    });
+  }, [rpcProvider]);
+  const ethersSigner = useMemo<providers.JsonRpcSigner | null>(() => {
+    if (!rpcProvider) return null;
+    return new providers.Web3Provider(rpcProvider).getSigner();
+  }, [rpcProvider]);
+
+  const fetchUser = useCallback(async (): Promise<`0x${string}` | null> => {
+    const magic = getMagic();
+    if (!magic) return null;
+
+    type MagicUserInfo = {
+      email?: string | null;
+      wallets?: {
+        ethereum?: {
+          publicAddress?: string;
+        };
+      };
+    };
+
+    const userInfo = (await magic.user.getInfo()) as MagicUserInfo;
+    const address = userInfo.wallets?.ethereum?.publicAddress;
+    const normalizedAddress = address ? (address as `0x${string}`) : undefined;
+    setEoaAddress(normalizedAddress);
+    setEmail(userInfo.email ?? undefined);
+    return normalizedAddress ?? null;
+  }, []);
 
   useEffect(() => {
-    const magic = getMagic();
     if (!magic) return;
-
-    const client = createWalletClient({
-      chain: polygon,
-      transport: custom(magic.rpcProvider as any),
-    });
-
-    const ethersProvider = new providers.Web3Provider(magic.rpcProvider as any);
-
-    setWalletClient(client);
-    setEthersSigner(ethersProvider.getSigner());
+    let cancelled = false;
 
     magic.user.isLoggedIn().then((isLoggedIn) => {
-      if (isLoggedIn) {
+      if (!cancelled && isLoggedIn) {
         fetchUser();
       }
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchUser, magic]);
 
-  const fetchUser = useCallback(async () => {
+  const connect = useCallback(async (): Promise<`0x${string}` | null> => {
     const magic = getMagic();
-    if (!magic) return;
-    const userInfo = await magic.user.getInfo();
-    const address = (userInfo as any).wallets?.ethereum?.publicAddress;
-    setEoaAddress(address ? (address as `0x${string}`) : undefined);
-    setEmail(userInfo.email ?? undefined);
-  }, []);
-
-  const connect = useCallback(async () => {
-    const magic = getMagic();
-    if (!magic) return;
+    if (!magic) return null;
     try {
       await magic.wallet.connectWithUI();
-      await fetchUser();
+      return await fetchUser();
     } catch (error) {
       console.error("Connect error:", error);
+      return null;
     }
   }, [fetchUser]);
 
@@ -95,7 +115,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<WalletContextType>(
     () => ({
-      magic: getMagic(),
+      magic,
       eoaAddress,
       walletClient,
       ethersSigner,
@@ -105,7 +125,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       isConnected: !!eoaAddress,
       email,
     }),
-    [eoaAddress, walletClient, ethersSigner, connect, disconnect, email]
+    [magic, eoaAddress, walletClient, ethersSigner, connect, disconnect, email]
   );
 
   return (

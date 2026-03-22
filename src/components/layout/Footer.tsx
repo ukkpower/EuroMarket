@@ -3,8 +3,17 @@
 import { motion } from 'framer-motion';
 import { Twitter, MessageCircle, FileText, Lock, Code } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
+import { formatCompactCurrency, formatInteger } from '@/lib/intl';
 
 export function Footer() {
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage || i18n.language;
+
+  const totalVolumeLocked = formatCompactCurrency(24_700_000, language, 'EUR');
+  const activeTraders = formatInteger(12_847, language);
+  const activeMarkets = formatInteger(156, language);
+
   return (
     <footer className="border-t border-border/50 bg-card/50 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-8">
@@ -21,9 +30,9 @@ export function Footer() {
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              €24.7M
+              {totalVolumeLocked}
             </motion.p>
-            <p className="text-sm text-muted-foreground mt-1">Total Volume Locked</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('footer.stats.totalVolumeLocked')}</p>
           </motion.div>
           
           <motion.div
@@ -38,9 +47,9 @@ export function Footer() {
               animate={{ scale: [1, 1.02, 1] }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
             >
-              12,847
+              {activeTraders}
             </motion.p>
-            <p className="text-sm text-muted-foreground mt-1">Active Traders</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('footer.stats.activeTraders')}</p>
           </motion.div>
           
           <motion.div
@@ -51,93 +60,93 @@ export function Footer() {
             className="text-center"
           >
             <p className="text-2xl font-bold text-euro-lavender dark:text-euro-lavender">
-              156
+              {activeMarkets}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Active Markets</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('footer.stats.activeMarkets')}</p>
           </motion.div>
         </div>
 
         {/* Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h4 className="font-semibold text-sm mb-3">Platform</h4>
+            <h4 className="font-semibold text-sm mb-3">{t('footer.sections.platform')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  How it works
+                  {t('footer.links.howItWorks')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Markets
+                  {t('footer.links.markets')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Leaderboard
+                  {t('footer.links.leaderboard')}
                 </Link>
               </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-sm mb-3">Resources</h4>
+            <h4 className="font-semibold text-sm mb-3">{t('footer.sections.resources')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                   <Code className="h-3 w-3" />
-                  API Docs
+                  {t('footer.links.apiDocs')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Help Center
+                  {t('footer.links.helpCenter')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Blog
+                  {t('footer.links.blog')}
                 </Link>
               </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-sm mb-3">Legal</h4>
+            <h4 className="font-semibold text-sm mb-3">{t('footer.sections.legal')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                   <FileText className="h-3 w-3" />
-                  Terms of Service
+                  {t('footer.links.terms')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                   <Lock className="h-3 w-3" />
-                  Privacy Policy
+                  {t('footer.links.privacy')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Cookie Policy
+                  {t('footer.links.cookie')}
                 </Link>
               </li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-sm mb-3">Community</h4>
+            <h4 className="font-semibold text-sm mb-3">{t('footer.sections.community')}</h4>
             <ul className="space-y-2">
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                   <Twitter className="h-3 w-3" />
-                  X (Twitter)
+                  {t('footer.links.twitter')}
                 </Link>
               </li>
               <li>
                 <Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                   <MessageCircle className="h-3 w-3" />
-                  Discord
+                  {t('footer.links.discord')}
                 </Link>
               </li>
             </ul>
@@ -148,19 +157,16 @@ export function Footer() {
         <div className="text-center pt-6 border-t border-border/50">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 mb-4">
             <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground">MiCA Compliant</span>
+            <span className="text-xs font-medium text-muted-foreground">{t('footer.micaCompliant')}</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            EuroBourse is a prediction market platform operating under the Markets in Crypto-Assets (MiCA) 
-            regulatory framework. Trading involves risk. Past performance does not guarantee future results. 
-            Please trade responsibly.
+            {t('footer.complianceNotice')}
           </p>
           <p className="text-xs text-muted-foreground mt-4">
-            © {new Date().getFullYear()} EuroBourse. All rights reserved.
+            © {new Date().getFullYear()} EuroBourse. {t('footer.rightsReserved')}
           </p>
         </div>
       </div>
     </footer>
   );
 }
-

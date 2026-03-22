@@ -5,6 +5,7 @@ export { TradeSidebar, TradeSidebarSkeleton } from './TradeSidebar';
 export { OrderBookPanel, OrderBookPanelSkeleton } from './OrderBookPanel';
 export { PriceChart, PriceChartSkeleton } from './PriceChart';
 export { EventDescription, EventDescriptionSkeleton } from './EventDescription';
+export { ResolutionHistoryTimeline } from './ResolutionHistoryTimeline';
 
 // Subcomponents
 export { OutcomeSelector } from './OutcomeSelector';

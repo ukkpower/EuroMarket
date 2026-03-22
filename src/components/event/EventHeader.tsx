@@ -1,53 +1,85 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ArrowLeft, Share2, Bookmark, Clock, TrendingUp, Droplets } from 'lucide-react';
-import Link from 'next/link';
-import { ChanceGauge } from '@/components/ChanceGauge';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Link2, Check, Bookmark, Clock, TrendingUp, Droplets } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatVolume } from '@/hooks/usePolymarketEvents';
 import type { ParsedEvent, ParsedMarket } from '@/types/market';
 import { cn } from '@/lib/utils';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { formatMarketTimeRemaining } from '@/lib/marketStatus';
 
 type EventHeaderProps = {
   event: ParsedEvent;
   selectedMarket?: ParsedMarket;
 };
 
-function formatTimeRemaining(endDate: string): string {
-  const end = new Date(endDate);
-  const now = new Date();
-  const diff = end.getTime() - now.getTime();
-
-  if (diff <= 0) return 'Ended';
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-  if (days > 30) {
-    const months = Math.floor(days / 30);
-    return `${months}mo remaining`;
+async function copyTextToClipboard(text: string): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return true;
   }
-  if (days > 0) {
-    return `${days}d ${hours}h remaining`;
+
+  if (typeof document === 'undefined') {
+    return false;
   }
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  return `${hours}h ${minutes}m remaining`;
+
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    return document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textArea);
+  }
 }
 
 export function EventHeader({ event, selectedMarket }: EventHeaderProps) {
+  const { t } = useTranslation();
+  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const [didCopyLink, setDidCopyLink] = useState(false);
+  const shareResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const market = selectedMarket || event.topMarket;
+  const bookmarkMarketId = market?.id ?? null;
+  const bookmarked = isBookmarked(event.id, bookmarkMarketId);
+
+  const handleBookmarkClick = async () => {
+    await toggleBookmark({ event, marketId: bookmarkMarketId });
+  };
+
+  const handleShareClick = async () => {
+    const copied = await copyTextToClipboard(window.location.href);
+    if (!copied) {
+      return;
+    }
+
+    setDidCopyLink(true);
+
+    if (shareResetTimerRef.current) {
+      clearTimeout(shareResetTimerRef.current);
+    }
+
+    shareResetTimerRef.current = setTimeout(() => {
+      setDidCopyLink(false);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (shareResetTimerRef.current) {
+        clearTimeout(shareResetTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-4">
-      {/* Back Navigation */}
-      <Link 
-        href="/markets"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        <span>Back to Markets</span>
-      </Link>
-
       {/* Main Header */}
       <div className="flex flex-col lg:flex-row lg:items-start gap-4">
         {/* Event Image */}
@@ -116,62 +148,126 @@ export function EventHeader({ event, selectedMarket }: EventHeaderProps) {
             {market && (
               <div className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4" />
-                <span className="font-medium">{formatTimeRemaining(market.endDate)}</span>
+                <span className="font-medium">{formatMarketTimeRemaining(market)}</span>
               </div>
             )}
           </motion.div>
         </div>
 
-        {/* Actions and Gauge (Desktop) */}
+        {/* Actions (Desktop) */}
         <div className="hidden lg:flex items-start gap-4">
-          {/* Chance Gauge for Single Market */}
-          {event.isSingleMarket && market && (
-            <ChanceGauge probability={market.probability} size="lg" />
-          )}
-
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
-              aria-label="Share"
+              className={cn(
+                'p-2.5 rounded-xl transition-colors',
+                didCopyLink
+                  ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                  : 'bg-secondary hover:bg-secondary/80'
+              )}
+              aria-label={didCopyLink ? 'Link copied' : 'Copy page link'}
+              onClick={handleShareClick}
             >
-              <Share2 className="h-5 w-5" />
+              <AnimatePresence mode="wait" initial={false}>
+                {didCopyLink ? (
+                  <motion.span
+                    key="share-check-desktop"
+                    initial={{ opacity: 0, scale: 0.7, rotate: -12 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.7, rotate: 12 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex"
+                  >
+                    <Check className="h-5 w-5" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="share-link-desktop"
+                    initial={{ opacity: 0, scale: 0.7, rotate: 12 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.7, rotate: -12 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex"
+                  >
+                    <Link2 className="h-5 w-5" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
-              aria-label="Bookmark"
+              className={cn(
+                'p-2.5 rounded-xl transition-colors',
+                bookmarked
+                  ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                  : 'bg-secondary hover:bg-secondary/80'
+              )}
+              aria-label={bookmarked ? t('bookmarks.removeAria') : t('bookmarks.addAria')}
+              onClick={handleBookmarkClick}
             >
-              <Bookmark className="h-5 w-5" />
+              <Bookmark className={cn('h-5 w-5', bookmarked && 'fill-current')} />
             </motion.button>
           </div>
         </div>
       </div>
 
       {/* Mobile Actions */}
-      <div className="flex lg:hidden items-center justify-between">
-        {event.isSingleMarket && market && (
-          <ChanceGauge probability={market.probability} size="md" />
-        )}
+      <div className="flex lg:hidden items-center justify-end">
         <div className="flex items-center gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
-            aria-label="Share"
+            className={cn(
+              'p-2 rounded-lg transition-colors',
+              didCopyLink
+                ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                : 'bg-secondary hover:bg-secondary/80'
+            )}
+            aria-label={didCopyLink ? 'Link copied' : 'Copy page link'}
+            onClick={handleShareClick}
           >
-            <Share2 className="h-4 w-4" />
+            <AnimatePresence mode="wait" initial={false}>
+              {didCopyLink ? (
+                <motion.span
+                  key="share-check-mobile"
+                  initial={{ opacity: 0, scale: 0.7, rotate: -12 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.7, rotate: 12 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex"
+                >
+                  <Check className="h-4 w-4" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="share-link-mobile"
+                  initial={{ opacity: 0, scale: 0.7, rotate: 12 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.7, rotate: -12 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex"
+                >
+                  <Link2 className="h-4 w-4" />
+                </motion.span>
+              )}
+            </AnimatePresence>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
-            aria-label="Bookmark"
+            className={cn(
+              'p-2 rounded-lg transition-colors',
+              bookmarked
+                ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                : 'bg-secondary hover:bg-secondary/80'
+            )}
+            aria-label={bookmarked ? t('bookmarks.removeAria') : t('bookmarks.addAria')}
+            onClick={handleBookmarkClick}
           >
-            <Bookmark className="h-4 w-4" />
+            <Bookmark className={cn('h-4 w-4', bookmarked && 'fill-current')} />
           </motion.button>
         </div>
       </div>
@@ -182,10 +278,7 @@ export function EventHeader({ event, selectedMarket }: EventHeaderProps) {
 // Skeleton for loading state
 export function EventHeaderSkeleton() {
   return (
-    <div className="space-y-4">
-      {/* Back link skeleton */}
-      <div className="h-5 w-28 bg-secondary animate-pulse rounded" />
-
+    <div>
       <div className="flex flex-col lg:flex-row lg:items-start gap-4">
         {/* Image skeleton */}
         <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl bg-secondary animate-pulse" />
@@ -204,8 +297,16 @@ export function EventHeaderSkeleton() {
           </div>
         </div>
 
-        {/* Gauge skeleton */}
-        <div className="hidden lg:block w-[72px] h-[72px] rounded-full bg-secondary animate-pulse" />
+        {/* Actions skeleton */}
+        <div className="hidden lg:flex gap-2">
+          <div className="w-10 h-10 rounded-xl bg-secondary animate-pulse" />
+          <div className="w-10 h-10 rounded-xl bg-secondary animate-pulse" />
+        </div>
+      </div>
+
+      <div className="mt-4 flex lg:hidden justify-end gap-2">
+        <div className="w-8 h-8 rounded-lg bg-secondary animate-pulse" />
+        <div className="w-8 h-8 rounded-lg bg-secondary animate-pulse" />
       </div>
     </div>
   );

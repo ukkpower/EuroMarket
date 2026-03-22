@@ -9,7 +9,7 @@ export interface WalletContextType {
   walletClient: WalletClient | null;
   ethersSigner: providers.JsonRpcSigner | null;
   publicClient: PublicClient | null;
-  connect: () => Promise<void>;
+  connect: () => Promise<`0x${string}` | null>;
   disconnect: () => Promise<void>;
   isConnected: boolean;
   email: string | undefined;
@@ -21,7 +21,7 @@ export const WalletContext = createContext<WalletContextType>({
   walletClient: null,
   ethersSigner: null,
   publicClient: null,
-  connect: async () => {},
+  connect: async () => null,
   disconnect: async () => {},
   isConnected: false,
   email: undefined,
