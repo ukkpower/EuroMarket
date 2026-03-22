@@ -38,9 +38,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | undefined>(undefined);
   const magic = useMemo(() => getMagic(), []);
   const rpcProvider = useMemo(
-    () => (magic ? (magic.rpcProvider as providers.ExternalProvider) : null),
+    () => (magic ? magic.rpcProvider : null),
     [magic]
   );
+  const ethersProvider = useMemo<providers.ExternalProvider | null>(() => {
+    if (!rpcProvider) return null;
+
+    return {
+      request: ({ method, params }) => rpcProvider.request({ method, params }),
+      sendAsync: (request, callback) => rpcProvider.sendAsync(request, callback),
+      send: (request, callback) => rpcProvider.send(request as any, callback),
+    };
+  }, [rpcProvider]);
   const walletClient = useMemo<WalletClient | null>(() => {
     if (!rpcProvider) return null;
 
@@ -50,9 +59,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     });
   }, [rpcProvider]);
   const ethersSigner = useMemo<providers.JsonRpcSigner | null>(() => {
-    if (!rpcProvider) return null;
-    return new providers.Web3Provider(rpcProvider).getSigner();
-  }, [rpcProvider]);
+    if (!ethersProvider) return null;
+    return new providers.Web3Provider(ethersProvider).getSigner();
+  }, [ethersProvider]);
 
   const fetchUser = useCallback(async (): Promise<`0x${string}` | null> => {
     const magic = getMagic();

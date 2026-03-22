@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
@@ -24,6 +24,14 @@ import { useEventStore } from '@/store/eventStore';
 import type { ParsedMarket } from '@/types/market';
 
 export default function EventPage() {
+  return (
+    <Suspense fallback={<EventPageSkeleton />}>
+      <EventPageContent />
+    </Suspense>
+  );
+}
+
+function EventPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const slug = params.slug as string;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { Suspense, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Moon, Sun, HelpCircle, LogIn, LogOut, Wallet, User, Briefcase, Copy, Check } from 'lucide-react';
@@ -17,6 +17,10 @@ import { useTrading } from '@/providers/TradingProvider';
 
 function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function SearchBarFallback() {
+  return <div className="h-10 w-full rounded-md bg-secondary/40" aria-hidden="true" />;
 }
 
 export function Header() {
@@ -91,7 +95,9 @@ export function Header() {
 
         {/* Search Bar - Center */}
         <div className="hidden md:flex flex-1 justify-center max-w-xl">
-          <SearchBar />
+          <Suspense fallback={<SearchBarFallback />}>
+            <SearchBar />
+          </Suspense>
         </div>
 
         {/* Right Actions */}
@@ -209,7 +215,9 @@ export function Header() {
 
       {/* Mobile Search - Below header */}
       <div className="md:hidden px-4 pb-3">
-        <SearchBar />
+        <Suspense fallback={<SearchBarFallback />}>
+          <SearchBar />
+        </Suspense>
       </div>
     </header>
   );

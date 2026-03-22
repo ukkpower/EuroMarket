@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, SearchX } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
@@ -17,6 +18,14 @@ import { formatInteger } from '@/lib/intl';
 import { shouldUseSingleStyleCard } from '@/lib/sportsCardMeta';
 
 export default function SearchResultsPage() {
+  return (
+    <Suspense fallback={<SearchResultsFallback />}>
+      <SearchResultsContent />
+    </Suspense>
+  );
+}
+
+function SearchResultsContent() {
   const { t, i18n } = useTranslation();
   const searchParams = useSearchParams();
   const query = searchParams.get('q')?.trim() ?? '';
@@ -123,6 +132,14 @@ function SearchResultsSkeleton() {
           ? <SingleMarketCardSkeleton key={index} />
           : <MultiMarketCardSkeleton key={index} />
       ))}
+    </div>
+  );
+}
+
+function SearchResultsFallback() {
+  return (
+    <div className="flex-1 p-4 lg:p-6">
+      <SearchResultsSkeleton />
     </div>
   );
 }
